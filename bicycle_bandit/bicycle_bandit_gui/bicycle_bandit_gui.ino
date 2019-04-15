@@ -1,5 +1,20 @@
 #include <M5Stack.h>
+/////////////////////////////////////
+//to check the length of the tables//
+/////////////////////////////////////
 
+template<typename T, size_t N> size_t ArraySize(T(&)[N]){ return N; }
+/////////////////////////////////////////////////////////
+// HOW TO USE: int sizeArray = ArraySize(nameOfTable); //
+/////////////////////////////////////////////////////////
+
+/////////////////////////////////////
+//             end                 //
+/////////////////////////////////////
+
+/////////////////
+// background  //
+/////////////////
 #define PicArray extern unsigned char 
 PicArray whiteSpaceBigTop[];
 PicArray whiteSpaceBigBot[];
@@ -8,58 +23,95 @@ PicArray whiteSpaceSmall[];
 PicArray separatingStrap[];
 PicArray topArrow[];
 PicArray botArrow[];
+PicArray greenButton[];
+PicArray blackSpace[];
+
 #define whiteSpaceBigTop whiteSpaceBigTop // 215 x 36
 #define whiteSpaceBigBot whiteSpaceBigBot // 215 x 36
 #define whiteSpace whiteSpace // 145 x 24
 #define whiteSpaceSmall whiteSpaceSmall // 98 x 18
 #define separatingStrap separatingStrap // 240 x 10
 #define topArrow topArrow // 20x100
-#define botArrow botArrow // 20x100
+#define botArrow botArrow // 20x50
+#define greenButton greenButton // 240x128
+#define blackSpace blackSpace // 240x128
+/////////////////
+//     end     //
+/////////////////
 
-
+//////////
+//colors//
+//////////
 const unsigned int black = M5.Lcd.color565(0,0,0);
 const unsigned int blue = M5.Lcd.color565(0,0,255);
 const unsigned int red = M5.Lcd.color565(237,0,0);
+//////////
+// end  //
+//////////
 
+//////////
+//tabels//
+//////////
 char *names[] = {"Radek P", "Kasia O", "Igor J", "Justyna Z", "Lukasz D", "Magda W", "Iza M", "Oleh R", "Klaudia M", "Bartek B", "Magda Z"};
-char *works[] = {"Lodowka", "Ciepla woda", "Wino", "Papierosy"};
-int i = 0;
-int j = 0;
+char *works[] = {"Lodowka", "Ciepla woda"};
+int sizeOfNames = ArraySize(names);
+int sizeOfWorks = ArraySize(works);
+int currentPositionName = 0;
+int currentPositionWork = 0;
+//////////
+// end  //
+//////////
+
+bool displayTheGreenButton = false;
 
 void setup() {
   M5.begin();
-  M5.Lcd.setBrightness(200);
+  M5.Lcd.setBrightness(100);
   M5.Lcd.setRotation(2);
-  loadingWholeBackground();
-  printNames(i);
-  printWorks(j);
+  loadingGui();
+  printNames(currentPositionName);
+  printWork(currentPositionWork);
 }
 
 void loop() {
   if(M5.BtnC.wasPressed()) {
-    i += 1;
-    if(i == 11) {
-      i = 0;
+    displayBlackSpace();
+    displayTheGreenButton = false;
+    currentPositionName += 1;
+    if(currentPositionName == sizeOfNames) {
+      currentPositionName = 0;
     }
     cleaningTopPanel();
-    printNames(i);
+    printNames(currentPositionName);
+    
   }
   if(M5.BtnA.wasPressed()) {
-    j += 1;
-    if(j == 4) {
-      j = 0;
+    displayBlackSpace();
+    displayTheGreenButton = false;
+    currentPositionWork += 1;
+    if(currentPositionWork == sizeOfWorks) {
+      currentPositionWork = 0;
     }
     cleaningBotPanel();
-    printWorks(j);
+    printWork(currentPositionWork);
+  }
+  if(M5.BtnB.wasPressed()) {
+     displayTheGreenButton = !displayTheGreenButton;
+     if(displayTheGreenButton == true){
+      displayGreenButton();
+     }
+     if(displayTheGreenButton == false){
+      displayBlackSpace();
+     }
   }
   M5.update();  
 }
 
 
-void loadingWholeBackground() {
+void loadingGui() {
   M5.Lcd.drawBitmap(0, 0, 240, 10, (uint8_t*)separatingStrap);
   M5.Lcd.drawBitmap(0, 110, 240, 10, (uint8_t*)separatingStrap);
-  M5.Lcd.drawBitmap(0, 200, 240, 10, (uint8_t*)separatingStrap);
+  M5.Lcd.drawBitmap(0, 248, 240, 10, (uint8_t*)separatingStrap);
   M5.Lcd.drawBitmap(0, 310, 240, 10, (uint8_t*)separatingStrap);
   
   M5.Lcd.drawBitmap(5, 15, 215, 36, (uint8_t*)whiteSpaceBigTop);
@@ -67,11 +119,10 @@ void loadingWholeBackground() {
   M5.Lcd.drawBitmap(5, 87, 98, 18, (uint8_t*)whiteSpaceSmall);
   
   M5.Lcd.drawBitmap(5, 269, 215, 36, (uint8_t*)whiteSpaceBigBot);
-  M5.Lcd.drawBitmap(5, 239, 145, 24, (uint8_t*)whiteSpace);
-  M5.Lcd.drawBitmap(5, 215, 98, 18, (uint8_t*)whiteSpaceSmall);
 
   M5.Lcd.drawBitmap(220, 10, 20, 100, (uint8_t*)topArrow);
-  M5.Lcd.drawBitmap(220, 210, 20, 100, (uint8_t*)botArrow);  
+  M5.Lcd.drawBitmap(220, 260, 20, 50, (uint8_t*)botArrow);
+  M5.Lcd.drawBitmap(0, 120, 240, 128, (uint8_t*)blackSpace);  
 }
 
 void cleaningTopPanel() {
@@ -83,9 +134,7 @@ void cleaningTopPanel() {
 
 void cleaningBotPanel() {
   M5.Lcd.drawBitmap(5, 269, 215, 36, (uint8_t*)whiteSpaceBigBot);
-  M5.Lcd.drawBitmap(5, 239, 145, 24, (uint8_t*)whiteSpace);
-  M5.Lcd.drawBitmap(5, 215, 98, 18, (uint8_t*)whiteSpaceSmall);
-  M5.Lcd.drawBitmap(220, 210, 20, 100, (uint8_t*)botArrow);
+  M5.Lcd.drawBitmap(220, 260, 20, 50, (uint8_t*)botArrow);
 }
 
 void printName(int indexOfName, int textSize, int textColor, int xCursor ) {
@@ -113,27 +162,20 @@ void printNames(int indexOfMainName) {
   }
 }
 
-void printWork(int indexOfWork, int textSize, int textColor, int xCursor ) {
-  M5.Lcd.setTextColor(textColor);
-  M5.Lcd.setTextSize(textSize);
-  M5.Lcd.setCursor( 9, xCursor);
+void printWork(int indexOfWork) {
+  M5.Lcd.setTextColor(blue);
+  M5.Lcd.setTextSize(3);
+  M5.Lcd.setCursor( 9, 275);
   M5.Lcd.println(works[indexOfWork]);  
 }
 
-void printWorks(int indexOfMainWork) {
-  if(indexOfMainWork == 3) {
-    printWork(3, 3, blue, 274);
-    printWork(0, 2, black, 244);
-    printWork(1, 1, black, 219);    
-  }
-  if(indexOfMainWork == 2) {
-    printWork(2, 3, blue, 274);
-    printWork(3, 2, black, 244);
-    printWork(0, 1, black, 219);    
-  }
-  if(indexOfMainWork != 3 && indexOfMainWork != 2) {
-    printWork(indexOfMainWork, 3, blue, 274);
-    printWork(indexOfMainWork + 1, 2, black, 244);
-    printWork(indexOfMainWork + 2, 1, black, 219);    
-  }
+void displayGreenButton() {
+  M5.Lcd.drawBitmap(0, 120, 240, 128, (uint8_t*)greenButton);
+  M5.Lcd.setTextColor(black);
+  M5.Lcd.setTextSize(3);
+  M5.Lcd.setCursor( 62, 174);
+  M5.Lcd.println("Eco Go!");  
+}
+void displayBlackSpace(){
+  M5.Lcd.drawBitmap(0, 120, 240, 128, (uint8_t*)blackSpace);
 }
